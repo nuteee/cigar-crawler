@@ -69,7 +69,7 @@ class HacicoSpider(scrapy.Spider):
                     currency = tmp[0]
 
                     try:
-                        price = float(tmp[1].replace(',', '.'))
+                        price = float(tmp[1].replace('.', '').replace(',', '.'))
                     except Exception as e:
                         return
 
@@ -93,6 +93,6 @@ class HacicoSpider(scrapy.Spider):
 
     def getActualAmount(self, amt):
         try:
-            return int(re.findall(r'\d+', 'bundle (10 pcs)')[-1])
-        except AttributeError:
+            return int(re.findall(r'\d+', amt)[-1])
+        except Exception:
             return 1
