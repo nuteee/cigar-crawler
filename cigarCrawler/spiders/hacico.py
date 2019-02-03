@@ -59,7 +59,7 @@ class HacicoSpider(scrapy.Spider):
                 name = item.xpath('div[1]/a/text()').get().strip()
             except AttributeError:
                 return
-            
+
             for row in item.xpath('div[2]/table/tr[1]/td[4]/table/tr'):
                 if self.isItemAvailable(row):
                     cigar_type = self.getActualAmount(row.xpath(
@@ -74,13 +74,17 @@ class HacicoSpider(scrapy.Spider):
                         return
 
                     if price is not 0:
-                        yield {'Name': name, 'Amount': cigar_type, 'Price': price, 'Currency': currency, 'Price / stick': price / cigar_type, 'Country': response.meta['country'], 'Brand': response.meta['brand']}
+                        yield {'URL': response.url, 'Name': name, 'Amount': cigar_type, 'Price': price, 'Currency': currency, 'Price / stick': price / cigar_type, 'Country': response.meta['country'], 'Brand': response.meta['brand']}
 
         try:
             next_page = response.xpath(
                 '//a[@class="pageResults" and @title=" next page "]/@href').get()
 
-            yield Request(next_page, callback=self.parseBrands)
+            request = Request(next_page, callback=self.parseBrands)
+            request.meta['country'] = response.meta['country']
+            request.meta['brand'] = response.meta['brand']
+
+            yield request
         except Exception as e:
             print e
 
@@ -89,6 +93,6 @@ class HacicoSpider(scrapy.Spider):
 
     def getActualAmount(self, amt):
         try:
-            return int(re.search(r'\d+', amt).group())
+            return int(re.findall(r'\d+', 'bundle (10 pcs)')[-1])
         except AttributeError:
             return 1
