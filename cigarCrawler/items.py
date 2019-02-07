@@ -8,7 +8,15 @@
 import scrapy
 
 
-class CigarcrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class Cigar(scrapy.Item):
+    country = scrapy.Field()
+    brand = scrapy.Field()
+    name = scrapy.Field()
+    amount = scrapy.Field(serializer=int)
+    price = scrapy.Field(serializer=float)
+    pricePerStick = scrapy.Field(serializer=float)
+    pricePerStickHuf = scrapy.Field(serializer=float)
+    currency = scrapy.Field()
+    website = scrapy.Field()
+    url = scrapy.Field()
+

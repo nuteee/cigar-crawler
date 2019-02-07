@@ -2,6 +2,8 @@
 import re
 import scrapy
 from scrapy import Request
+from scrapy.loader import ItemLoader
+from cigarCrawler.items import Cigar
 
 
 class HacicoSpider(scrapy.Spider):
@@ -69,16 +71,17 @@ class HacicoSpider(scrapy.Spider):
                     currency = tmp[0]
 
                     try:
-                        price = float(tmp[1].replace('.', '').replace(',', '.'))
+                        price = float(tmp[1].replace(
+                            '.', '').replace(',', '.'))
                     except Exception as e:
                         return
 
                     if price is not 0:
-                        yield {'URL': response.url, 'Name': name, 'Amount': cigar_type, 'Price': price, 'Currency': currency, 'Price / stick': price / cigar_type, 'Country': response.meta['country'], 'Brand': response.meta['brand']}
+                        yield Cigar({'url': response.url, 'name': name, 'amount': cigar_type, 'price': price, 'currency': currency, 'country': response.meta['country'],
+                                     'brand': response.meta['brand'], 'website': 'Hacico'})
 
         try:
-            next_page = response.xpath(
-                '//a[@class="pageResults" and @title=" next page "]/@href').get()
+            next_page = response.xpath('//a[@class="pageResults" and @title=" next page "]/@href').get()
 
             request = Request(next_page, callback=self.parseBrands)
             request.meta['country'] = response.meta['country']
@@ -86,7 +89,7 @@ class HacicoSpider(scrapy.Spider):
 
             yield request
         except Exception as e:
-            print e
+            return
 
     def isItemAvailable(self, item):
         return len(item.xpath('td[5]/input').extract()) != 0
