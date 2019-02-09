@@ -1,1 +1,1 @@
-python start_discord_bot.py
+worker: python start_discord_bot.py
