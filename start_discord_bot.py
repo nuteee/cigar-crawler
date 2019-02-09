@@ -84,24 +84,37 @@ class MyClient(discord.Client):
                     embed = discord.Embed(
                         title='Search result for [' + search_text + ']', footer="There are x result", color=0x00aa00, author="NuTeeE")
 
+                    savedCigars = []
                     for cigar in list(self.mongoDb.getDB().aggregate(
                         [
                             {'$match': {'$text': {'$search': search_text}}},
                             {'$addFields': {'score': {'$meta': 'textScore'}}},
-                            {'$match': {'score': {'$gt': 80.0}}},
+                            {'$match': {'score': {'$gt': 50*len(search_text.split(' '))}}},
                             # {'$match': {'website': {'$eq': 'DanPipe'}}},
                             {'$sort': {'score': -1, 'pricePerStick': 1}},
-                            {'$limit': 5}
+                            {'$limit': 15}
                         ]
-                    ))[:25]:
-                        logging.info(str(cigar))
+                    )):
                         if cigar['amount'] is 1:
-                            field_string = 'Price / Stick: [{0:,.0f} €] [{1:,.0f} Ft]\nURL: [{5}]\nScore: [{6:.5f}]'
+                            field_string = 'Price / Stick: [{0:,.0f} €] [{1:,.0f} Ft]\nURL: [{5}]\nSearch Score: [{6:.5f}]'
                         else:
-                            field_string = 'Price / Stick: [{0:,.0f} €] [{1:,.0f} Ft]\nAmount: [{2}]\nActual price: [{3:,.0f} €] [{4:,.0f} Ft]\nURL: [{5}]\nScore: [{6:.5f}]'
+                            field_string = 'Price / Stick: [{0:,.0f} €] [{1:,.0f} Ft]\nAmount: [{2}]\nActual price: [{3:,.0f} €] [{4:,.0f} Ft]\nURL: [{5}]\nSearch score: [{6:.5f}]'
 
-                        embed.add_field(name=cigar['name'], value=field_string.format(
-                            cigar['pricePerStick'], cigar['pricePerStickHuf'], cigar['amount'], cigar['price'], cigar['amount'] * cigar['pricePerStickHuf'], cigar['url'], cigar['score']))
+                        updated = False
+                        for savedCigar in savedCigars:
+                            if cigar['name'] == savedCigar['name']:
+                                updated = True
+                                if float(cigar['pricePerStick']) < float(savedCigar['pricePerStick']):
+                                    savedCigars.append(cigar)
+                                    embed.set_field_at(index=savedCigars.index(savedCigar), name=cigar['name'], value=field_string.format(
+                                        cigar['pricePerStick'], cigar['pricePerStickHuf'], cigar['amount'], cigar['price'], cigar['amount'] * cigar['pricePerStickHuf'], cigar['url'], cigar['score']))
+
+                        if not updated:
+                            savedCigars.append(cigar)
+                            embed.add_field(name=cigar['name'], value=field_string.format(
+                                cigar['pricePerStick'], cigar['pricePerStickHuf'], cigar['amount'], cigar['price'], cigar['amount'] * cigar['pricePerStickHuf'], cigar['url'], cigar['score']))
+
+                        # logging.info(embed.fields)
 
                     await message.channel.send(embed=embed)
             except Exception as e:
