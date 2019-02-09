@@ -91,7 +91,7 @@ class MyClient(discord.Client):
                             {'$match': {'score': {'$gt': 80.0}}},
                             # {'$match': {'website': {'$eq': 'DanPipe'}}},
                             {'$sort': {'score': -1, 'pricePerStick': 1}},
-                            {'$limit': 7}
+                            {'$limit': 5}
                         ]
                     ))[:25]:
                         logging.info(str(cigar))
