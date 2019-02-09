@@ -28,6 +28,7 @@ class MongoPipeline(object):
     def __init__(self, mongo_uri, mongo_db):
         self.client = pymongo.MongoClient(mongo_uri)
         self.db = self.client[mongo_db]
+        self.db[self.collection_name].ensure_index([('country', 'text'), ('brand', 'text'),('name', 'text')], name="search_index", weights={ 'name': 100, 'brand': 25, 'country': 17})
         # logging.info("[MongoDB] Dropping")
         # logging.info(self.db[self.collection_name])
         # self.db[self.collection_name].drop()
