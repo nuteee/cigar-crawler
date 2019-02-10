@@ -78,7 +78,7 @@ class MyClient(discord.Client):
 
         elif message.content.startswith('!count'):
             with message.channel.typing():
-                await message.channel.send(str(self.mongoDb.getCigarAmountsPerPage()))
+                await message.channel.send(str(self.mongoDb.getCigarAmountsPerPage()[0]))
 
         elif message.content.startswith('!search'):
             try:
