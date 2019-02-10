@@ -66,7 +66,7 @@ class DanpipeSpider(scrapy.Spider):
         country = response.meta['country']
         brand = response.meta['brand'].strip()
         name = response.meta['name'].strip().replace(
-            "»", '').replace('«', '').split(' ')[0]
+            "»", '').replace('«', '').split(',')[0]
 
         if name.split(' ')[-1] == 'Kiste' or name.split(' ')[-1] == 'Schachtel':
             name = " ".join(name.split(' ')[:-2])
