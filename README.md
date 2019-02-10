@@ -7,3 +7,7 @@ pip install scrapy forex-python
 
 scrapy crawl danpipe && scrapy crawl hacico
 
+# Heroku:
+
+heroku run:detached data_load
+heroku scale discord=1

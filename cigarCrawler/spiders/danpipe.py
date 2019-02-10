@@ -14,6 +14,10 @@ class DanpipeSpider(scrapy.Spider):
     allowed_domains = ['www.danpipe.de']
     start_urls = ['https://www.danpipe.de/Zigarren/Herkunftsland']
 
+    custom_settings = {
+        'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter',
+    }
+
     def parse(self, response):
 
         items = response.xpath('//td[@class="categoriesPreviewContent"]')
@@ -62,27 +66,52 @@ class DanpipeSpider(scrapy.Spider):
 
             yield request
 
+    def parseBrandAgain(self, response):
+        country = response.meta['country']
+        brand = response.meta['brand']
+
+        tmp = response.xpath(
+            '//div[@id="productlist"]/div/table/tr')
+        if len(tmp) is 0:
+            raise Exception("WTF")
+
+        for row in tmp:
+            name = row.xpath(
+                'td[@class="productPreviewContent"]/h2/a/text()').get().strip()
+            url = row.xpath(
+                'td[@class="productPreviewContent"]/h2/a/@href').get()
+
+            request = Request(url, callback=self.parseItem)
+            request.meta['country'] = country
+            request.meta['brand'] = brand
+            request.meta['name'] = name
+
+            yield request
+
     def parseItem(self, response):
         country = response.meta['country']
         brand = response.meta['brand'].strip()
-        name = response.meta['name'].strip().replace(
-            "»", '').replace('«', '').split(',')[0]
 
-        if name.split(' ')[-1] == 'Kiste' or name.split(' ')[-1] == 'Schachtel':
-            name = " ".join(name.split(' ')[:-2])
+        if self.shouldParseAgain(response):
+            logging.warn('Parsing again: [' + response.url + ']')
+            request = Request(response.url, callback=self.parseBrandAgain)
+            request.meta['country'] = country
+            request.meta['brand'] = brand
 
-        if self.isItemAvailable(response):
+            yield request
+        else:
+            logging.warn('Parsing [' + response.url + ']')
+            name = response.meta['name'].strip().replace(
+                "»", '').replace('«', '').split(',')[0]
 
-            cigar_type = self.getActualAmount(
-                response.xpath('//h1[@itemprop="name"]/text()').get().strip())
+            if name.split(' ')[-1] == 'Kiste' or name.split(' ')[-1] == 'Schachtel':
+                name = " ".join(name.split(' ')[:-2])
 
-            if self.shouldParseAgain(response):
-                request = Request(response.url, callback=self.parseBrands)
-                request.meta['country'] = country
-                request.meta['brand'] = brand
+            if self.isItemAvailable(response):
 
-                yield request
-            else:
+                cigar_type = self.getActualAmount(
+                    response.xpath('//h1[@itemprop="name"]/text()').get().strip())
+
                 try:
                     price = float(response.xpath(
                         '//div[@id="productinfoprice"]/p[@class="productprice"]/span[@itemprop="price"]/text()').get())
@@ -90,7 +119,7 @@ class DanpipeSpider(scrapy.Spider):
                     price = float(response.xpath(
                         '//div[@id="productinfoprice"]/span[@itemprop="price"]/text()').get())
 
-                logging.warn("Found price: [" + str(price) + "]")
+                # logging.warn("Found price: [" + str(price) + "]")
                 isAvailable = self.isItemAvailable(response)
 
                 if isAvailable:
@@ -105,7 +134,8 @@ class DanpipeSpider(scrapy.Spider):
 
     def isItemAvailable(self, item):
         tmp = item.xpath('//p[@class="stockimagetext"]/text()').get().strip()
-        # logging.warn("Item available: " + str(tmp))
+        # logging.warn("Item available: " +
+        #              str("Derzeit nicht vorrätig" is not tmp))
         return "Derzeit nicht vorrätig" is not tmp
 
     def getActualAmount(self, amt):
