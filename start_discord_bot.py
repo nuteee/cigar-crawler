@@ -78,7 +78,8 @@ class MyClient(discord.Client):
 
         elif message.content.startswith('!count'):
             with message.channel.typing():
-                await message.channel.send(str(self.mongoDb.getCigarAmountsPerPage()[0]))
+                for item in self.mongoDb.getCigarAmountsPerPage():
+                    await message.channel.send(item)
 
         elif message.content.startswith('!search'):
             try:
@@ -106,7 +107,7 @@ class MyClient(discord.Client):
 
                         updated = False
                         for savedCigar in savedCigars:
-                            if cigar['name'] == savedCigar['name']:
+                            if cigar['name'] == savedCigar['name'] and cigar['website'] == savedCigar['website']:
                                 updated = True
                                 if float(cigar['pricePerStick']) < float(savedCigar['pricePerStick']):
                                     savedCigars.append(cigar)

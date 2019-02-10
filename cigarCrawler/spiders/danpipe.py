@@ -64,8 +64,12 @@ class DanpipeSpider(scrapy.Spider):
 
     def parseItem(self, response):
         country = response.meta['country']
-        brand = response.meta['brand']
-        name = response.meta['name']
+        brand = response.meta['brand'].strip()
+        name = response.meta['name'].strip().replace(
+            "»", '').replace('«', '').split(' ')[0]
+
+        if name.split(' ')[-1] == 'Kiste' or name.split(' ')[-1] == 'Schachtel':
+            name = " ".join(name.split(' ')[:-2])
 
         if self.isItemAvailable(response):
 
