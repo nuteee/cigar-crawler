@@ -76,6 +76,10 @@ class MyClient(discord.Client):
                 await asyncio.sleep(5.0)
                 await message.channel.send('Done sleeping.')
 
+        elif message.content.startswith('!count'):
+            with message.channel.typing():
+                await message.channel.send(str(self.mongoDb.getCigarAmountsPerPage()))
+
         elif message.content.startswith('!search'):
             try:
                 search_text = message.content.split('!search')[1].strip()
@@ -96,9 +100,9 @@ class MyClient(discord.Client):
                         ]
                     )):
                         if cigar['amount'] is 1:
-                            field_string = 'Price / Stick: [{0:,.0f} €] [{1:,.0f} Ft]\nURL: [{5}]\nSearch Score: [{6:.5f}]'
+                            field_string = 'Price / Stick: [{0:,.2f} €] [{1:,.0f} Ft]\nURL: [{5}]\nSearch Score: [{6:.5f}]'
                         else:
-                            field_string = 'Price / Stick: [{0:,.0f} €] [{1:,.0f} Ft]\nAmount: [{2}]\nActual price: [{3:,.0f} €] [{4:,.0f} Ft]\nURL: [{5}]\nSearch score: [{6:.5f}]'
+                            field_string = 'Price / Stick: [{0:,.2} €] [{1:,.0f} Ft]\nAmount: [{2}]\nActual price: [{3:,.2f} €] [{4:,.0f} Ft]\nURL: [{5}]\nSearch score: [{6:.5f}]'
 
                         updated = False
                         for savedCigar in savedCigars:
