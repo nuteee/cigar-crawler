@@ -5,7 +5,7 @@ This is a basic web-crawler project based on python and scrapy to get the prices
 
 pip install scrapy forex-python
 
-scrapy crawl danpipe && scrapy crawl hacico
+scrapy crawl danpipe && scrapy crawl hacico && scrapy crawl topcubans
 
 # Heroku:
 

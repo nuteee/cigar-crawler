@@ -12,11 +12,14 @@ from forex_python.converter import CurrencyRates
 
 
 class CigarcrawlerPipeline(object):
-    eurToHufRate = CurrencyRates().get_rate('EUR', 'HUF')
+    rates = {
+        'EUR': CurrencyRates().get_rate('EUR', 'HUF'),
+        'USD': CurrencyRates().get_rate('USD', 'HUF')
+    }
 
     def process_item(self, item, spider):
         item['pricePerStick'] = item.get('price') / item.get('amount')
-        item['pricePerStickHuf'] = item['pricePerStick'] * self.eurToHufRate
+        item['pricePerStickHuf'] = item['pricePerStick'] * self.rates[item['currency']]
 
         return item
 
