@@ -50,7 +50,7 @@ class MongoDB(object):
 
 class MyClient(discord.Client):
 
-    mongoDb = MongoDB(os.environ('MONGO_URI'), 'cigars')
+    mongoDb = MongoDB(os.environ['MONGO_URI'], 'cigars')
 
     async def on_ready(self):
         logging.info('Logged in as')
@@ -128,4 +128,4 @@ class MyClient(discord.Client):
 
 
 client = MyClient()
-client.run(os.environ('DISCORD_TOKEN'))
+client.run(os.environ['DISCORD_TOKEN'])
