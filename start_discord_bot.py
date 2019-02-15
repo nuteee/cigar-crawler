@@ -1,9 +1,10 @@
 import discord
 import asyncio
 import logging
+import os
 
-from cigarCrawler.settings import MONGO_URI
-from cigarCrawler.settings import DISCORD_TOKEN
+# from cigarCrawler.settings import MONGO_URI
+# from cigarCrawler.settings import DISCORD_TOKEN
 
 from pymongo import MongoClient
 
@@ -49,7 +50,7 @@ class MongoDB(object):
 
 class MyClient(discord.Client):
 
-    mongoDb = MongoDB(MONGO_URI, 'cigars')
+    mongoDb = MongoDB(os.environ('MONGO_URI'), 'cigars')
 
     async def on_ready(self):
         logging.info('Logged in as')
@@ -127,4 +128,4 @@ class MyClient(discord.Client):
 
 
 client = MyClient()
-client.run(DISCORD_TOKEN)
+client.run(os.environ('DISCORD_TOKEN'))
