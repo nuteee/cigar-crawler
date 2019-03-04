@@ -1,0 +1,43 @@
+{
+  "addons": [
+    "librato",
+    "papertrail"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "DISCORD_TOKEN": {
+      "required": true
+    },
+    "LIBRATO_PASSWORD": {
+      "required": true
+    },
+    "LIBRATO_TOKEN": {
+      "required": true
+    },
+    "LIBRATO_USER": {
+      "required": true
+    },
+    "MONGO_URI": {
+      "required": true
+    },
+    "PAPERTRAIL_API_TOKEN": {
+      "required": true
+    }
+  },
+  "formation": {
+    "discord": {
+      "quantity": 1
+    },
+    "load_data": {
+      "quantity": 1
+    }
+  },
+  "name": "cigar-crawler",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
