@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import re
+
 import scrapy
 from scrapy import Request
-from scrapy.loader import ItemLoader
+
 from cigarCrawler.items import Cigar
 
 
@@ -13,11 +14,11 @@ class HacicoSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        items = response.xpath('//div[@class="meineListe"]')
+        items = response.xpath('//a[@class="sub2"]')
 
         for item in items:
-            url = item.xpath('div/a/@href').get()
-            country = item.xpath('div/a/@title').get()
+            url = item.xpath('@href').get()
+            country = item.xpath('text()').get()
 
             request = Request(url, callback=self.parseCountry)
             request.meta['country'] = country
@@ -28,17 +29,17 @@ class HacicoSpider(scrapy.Spider):
 
         country = response.meta['country']
 
-        items = response.xpath('//div[@class="list_left"]')
+        items = response.xpath('//a[@class="sub3"]')
 
-        if(len(items) is 0):
+        if len(items) is 0:
             request = Request(response.url, callback=self.parseBrands)
             request.meta['country'] = country
             request.meta['brand'] = 'TODO'
             yield request
         else:
             for item in items:
-                url = item.xpath('div/div/strong/a/@href').get()
-                brand = item.xpath('div/div/strong/a/@title').get()
+                url = item.xpath('@href').get()
+                brand = item.xpath('text()').get()
                 try:
                     request = Request(url, callback=self.parseBrands)
                     request.meta['country'] = country
@@ -77,7 +78,8 @@ class HacicoSpider(scrapy.Spider):
                         return
 
                     if price is not 0:
-                        yield Cigar({'url': response.url, 'name': name, 'amount': cigar_type, 'price': price, 'currency': currency, 'country': response.meta['country'],
+                        yield Cigar({'url': response.url, 'name': name, 'amount': cigar_type, 'price': price,
+                                     'currency': currency, 'country': response.meta['country'],
                                      'brand': response.meta['brand'], 'website': 'Hacico'})
 
         try:
